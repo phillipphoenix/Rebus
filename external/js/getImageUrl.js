@@ -82,7 +82,7 @@ function getImageUrlGoogle(searchTerm, callback, errorCallback) {
       // Optional (defaults to 1): Page Number
       //pageNumber: parseInt($('#pageNumber').val()),
       // Optional (defaults to 10): Page Size
-      pageSize: 10,
+      pageSize: 1,
       // Optional (defaults to null): Limit to site. Shortcut to adding "site:example.org " to query
       //limitToSite: 'example.org',
       // Optional (defaults to false): Print console logging information about search results

@@ -3,11 +3,13 @@ var IMAGE_FADEIN_TIME = 1000;
 var SENTENCE_FADEOUT_TIME = 1000;
 var SENTENCE_FADEIN_TIME = 1500;
 var PUNCTUATION = [",", ".", "?", "!", "(", ")", "\"", "\\", "-", "[", "]", "/", ":", ";"];
+var PUNCTUATION_SPACING = ["", "", "", "", " ", " ", " ", "", "", " ", " ", "", "", ""];
 
 var currentSentence = 0;
 var sentences = [];
 
-function updateImages() {
+
+function updateImages() {	
 	if (currentSentence < 0) {
 		currentSentence = sentences.length-1;
 	}
@@ -17,7 +19,7 @@ function updateImages() {
 	// Empty the images and the sentence.
 	$("#images").empty();
 	$("#sentence").hide();
-	$("#sentence").empty().append("<h1>. . .</h1>");
+	$("#sentence").empty().append("<h1 class='rebus-hover' style='font-size: 60px;'>. . .</h1>");
 	// Change header.
 	$("#header").html("<h1>" + (currentSentence+1) + " / " + sentences.length + "</h1>");
 	// Get current sentence.
@@ -27,11 +29,13 @@ function updateImages() {
 	// Add the sentence.
 	$("#sentence").append("<h3>");
 	$("#sentence h3").hide();
+	
 	$.each(sentence, function(i, word) {
 		if(i != 0 && !isPunctuation(word)) {
 			$("#sentence h3").append(" " + word);
 		} else {
-			$("#sentence h3").append(word);
+			var spacing = PUNCTUATION_SPACING[punctuationIndex(word)] == undefined ? "" : PUNCTUATION_SPACING[punctuationIndex(word)];
+			$("#sentence h3").append(spacing + word);
 		}
 	});
 
@@ -48,6 +52,17 @@ function isPunctuation(word)
 	return false;
 }
 
+function punctuationIndex(word)
+{
+	var punctIndex;
+	for(punctIndex = 0; punctIndex < PUNCTUATION.length; ++punctIndex) {
+		if(word == PUNCTUATION[punctIndex]) {
+			return punctIndex;
+		}
+	}
+	return -1;
+}
+
 function fadeinSentence() {
 	$("#sentence").fadeIn(SENTENCE_FADEIN_TIME);
 	$("#sentence h1").on("mousedown", function(e) {
@@ -60,10 +75,12 @@ function fadeinSentence() {
 $(document).ready(function() {
 	// Remove all previous styling.
 	$('link[rel=stylesheet]').remove();
+	$("head").append("<link href='https://fonts.googleapis.com/css?family=Roboto:400,300,100' rel='stylesheet' type='text/css'>");
 
 	// Clone all paragraphs.
 	var paragraphs = $("p").clone();
 	$("body").empty();
+	$("body").addClass("rebus");
 	$("body").append("<div class='row'></div>")
 
 	// Create column for back, images and next areas.
@@ -79,6 +96,7 @@ $(document).ready(function() {
 	$("#previous").append("<a href='#' class='previous-btn'><i class='fa fa-chevron-left'></i></a>");
 	$("#next").append("<a href='#' class='next-btn'><i class='fa fa-chevron-right'></i></a>");
 
+	
 	// Separate all paragraphs into sentences made up of single words.
 	$.each(paragraphs, function(i, p) {
 		var words = [];
@@ -111,7 +129,7 @@ function displaySentence(sentence) {
 
 
 function extractCleanWords(dirtyWord, words)
-{
+{	
 	var letters = "";
 	var flag = true;
 	var charIndex;
@@ -129,10 +147,11 @@ function extractCleanWords(dirtyWord, words)
 				//document.write(" PUNCT " + dirtyWord.charAt(charIndex) + " ");
 				// If the punctuation symbol is a full stop, words contains a full sentence
 				if(PUNCTUATION[punctIndex] == ".") {
-					// Add words to sentences array
-					sentences.push(words);
+					// Add words to sentences array and clear words array					
+					sentences.push(words.splice(0, words.length));
+					//alert("Sentence after full stop: " + sentences[sentences.length-1]);
 					// Clear words array
-					words = [];
+					//words.length = 0;
 					//document.write("<br><br>");
 				}
 				// Clear letters and set flag
@@ -154,6 +173,8 @@ function extractCleanWords(dirtyWord, words)
 		}
 
 	}
+	
+	
 }
 
 function translateSentence(wordsArray, sentenceIndex, fadeinDelay, fadeinTime) {
@@ -162,30 +183,59 @@ function translateSentence(wordsArray, sentenceIndex, fadeinDelay, fadeinTime) {
 		if (sentenceIndex != currentSentence) {
 			return;
 		}
-		var image = $("<img>");
-		image.attr("src", imageUrl);
-		image.addClass('rebus-fadein');
-		image.attr("alt", "i: " + (i-1) + " word: " + wordsArray[i-1]);
-		$("#images").append(image);
-		image.waitForImages(function() {
-			// Fade in everything with this class.
+		if (isPunctuation(wordsArray[i-1])) {
+			var punc = $("<span>");
+			punc.html(wordsArray[i-1]);
+			punc.addClass("rebus-fadein");
+			punc.addClass("rebus-punctuation");
+			punc.attr("alt", "i: " + (i-1) + " word: " + wordsArray[i-1]);
+			$("#images").append(punc);
 			if (i < wordsArray.length-1) {
-				$(".rebus-fadein").delay(fadeinDelay*i).fadeIn(fadeinTime);
+				$(punc).delay(fadeinDelay*i).fadeIn(fadeinTime);
 			} else {
-				$(".rebus-fadein").delay(fadeinDelay*i).fadeIn(fadeinTime, function(e) {
+				$(punc).delay(fadeinDelay*i).fadeIn(fadeinTime, function(e) {
 					fadeinSentence();
 				});
 			}
-		});
+		} else {
+			// Add html code for image to images div
+			var image = $("<img>");
+			image.attr("src", imageUrl.url);
+			image.data("tbUrl", imageUrl.tbUrl);
+			image.attr("onError", "this.onerror=null;this.src='" + imageUrl.tbUrl + "';");
+			image.addClass('rebus-fadein');
+			image.attr("alt", "i: " + (i-1) + " word: " + wordsArray[i-1]);
+			image.attr("title", wordsArray[i-1]);
+			$("#images").append(image);
+			// Fetch images
+			image.waitForImages(function() {
+				// Fade in everything with this class.
+				if (i < wordsArray.length-1) {
+					$(image).delay(fadeinDelay*i).fadeIn(fadeinTime);
+				} else {
+					$(image).delay(fadeinDelay*i).fadeIn(fadeinTime, function(e) {
+						fadeinSentence();
+					});
+				}
+			});
+		}
 		if (i < wordsArray.length) {
 			getImageUrl(wordsArray[i++], handleImage, function(errorMessage) {
-				alert("An error occured");
+				console.error(errorMessage);
 			});
 		}
 	}
 
 	var i = 0;
 	getImageUrl(wordsArray[i++], handleImage, function(errorMessage) {
-		alert("An error occured");
+		console.error(errorMessage);
 	});
+}
+
+function onImageError(image) {
+	alert("Error");
+	var img = $(image);
+	img.attr("onError", "");
+	img.attr("src", img.data("tbUrl"));
+	return true;
 }

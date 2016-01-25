@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Rebus",
-  "description": "This extention turns a wikipedia article into a rebus.",
+  "description": "This extention turns a web page into a rebus.",
   "version": "1.0",
 
   "browser_action": {
@@ -15,13 +15,15 @@
     "external/js/*.js",
     "external/css/*.css"
  ],
-
-  "content_scripts": [
-    {
-      "all_frames": true,
-      "matches": ["http://*/*", "https://*/*" /*"https://*.wikipedia.org/*"*/],
-      "js": ["external/js/jquery.min.js", "external/js/bootstrap.min.js", "external/js/waitForImages.min.js", "external/js/getImageUrl.js", "rebus.js"],
-      "css": ["external/css/bootstrap.min.css", "external/css/font-awesome.min.css", "rebus.css"]
-    }
-  ]
+  "permissions": [
+    "activeTab",
+    "http://*/*",
+    "https://*/*",
+    "http://fonts.googleapis.com/",
+    "https://fonts.googleapis.com/"
+  ],
+  "background": {
+    "scripts": ["trigger.js"]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvuvIyzQVGfH9T0d/5///vSOJ8vNjtbINIdUXacykBR9ICBtBj87KPqOjmVIsaHDQLbo932cAB2lM69vSwQjDKUtzotLqzeRiIKmjLkSqcENpxDhzrQV3xwpqQwmOMveE7WCeOOXHyn03R06b+6UmNkEg3jYaEaVmjdSoGbmq/7SiJ1A3dIjNZSQVnhDbVBiLED/5Rn28qXQM6zEKcUagCiGPOST8KKZFxUFKmX3OaLMvBMme1qeV5iPdC6r8qBGmgHF8qm2H8qKpFAmOxJdED8lf9AigZ4k5qW3aI7o9HYY8dD10b/q5FKbtUvGYJzpCCLjgn1PgFNN4ZNw9XrdyUQIDAQAB"
 }

@@ -1,0 +1,39 @@
+.rebus-fadein {
+    display: none;
+}
+
+#previous, #next {
+    text-align: center;
+    font-size: 50px;
+    margin-top: 200px;
+}
+
+#previous a, #next a {
+    color: black;
+}
+
+#previous a:hover, #next a:hover {
+    color: darkgray;
+}
+
+#header {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#images {
+    margin-top: 50px;
+}
+
+#images img {
+    margin-right: 10px;
+    border: 1px solid gray;
+    padding: 3px;
+}
+
+#sentence {
+    display: none;
+    margin-top: 140px;
+    text-align: center;
+    margin-bottom: 100px;
+}
